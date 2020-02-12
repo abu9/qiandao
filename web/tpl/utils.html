@@ -67,7 +67,25 @@
       if ($this.data('confirm') && !window.confirm($this.data('confirm'))) {
         return false;
       }
-      $('<form></form>').attr('method', $this.data('method')).attr('action', $this.attr('href')).appendTo(document.body).submit();
+      var prompt_result = '';
+      if ($this.data('prompt') && !(prompt_result = window.prompt($this.data('prompt')))) {
+        return false;
+      }
+      var form = $('<form></form>')
+        .attr('method', $this.data('method'))
+        .attr('action', $this.attr('href'));
+      if ($this.attr('target')) {
+        form.attr('target', $this.attr('target'))
+      }
+      if (prompt_result) {
+        $('<input>')
+          .attr('name', 'prompt')
+          .attr('value', prompt_result)
+          .appendTo(form);
+      }
+      form
+        .appendTo(document.body)
+        .submit();
       return false;
     })
   })
@@ -124,9 +142,13 @@ $(function() {
     }
   });
 
+  $('[data-toggle=get-cookie][disabled]').attr('disabled', false);
+
   // fill cookie
   $('#variables').on('click', '[data-toggle=get-cookie]', function() {
     var $this = $(this);
+    if ($this.attr('disabled'))
+      return;
 
     if ($('body').attr('get-cookie') === undefined) {
       alert('尚未安装GetCookie插件，请安装插件或手动获取！');
